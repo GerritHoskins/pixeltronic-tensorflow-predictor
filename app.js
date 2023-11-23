@@ -40,18 +40,49 @@ function tensorToImage(tensor) {
     return canvas;
 }
 
-async function predict(model, imageElement) {
+function tensorToCanvas(tensor, canvasId) {
+    // Convert the tensor to a canvas element
+    const [height, width] = tensor.shape.slice(0, 2);
+    const canvas = document.getElementById(canvasId) || document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // Normalize the tensor to 0-255 and reshape to [height * width, 4] for RGBA format
+    let tensorData = tensor.mul(255).toInt().dataSync();
+    
+    // Handling cases where the tensor is not in RGBA format
+    if (tensorData.length !== height * width * 4) {
+        // Assuming the tensor is in RGB format, add an Alpha channel
+        const tensorWithAlpha = [];
+        for (let i = 0; i < tensorData.length; i += 3) {
+            tensorWithAlpha.push(...tensorData.slice(i, i + 3), 255); // Adding alpha value 255 (fully opaque)
+        }
+        tensorData = tensorWithAlpha;
+    }
+
+    const imageData = new ImageData(new Uint8ClampedArray(tensorData), width, height);
+    ctx.putImageData(imageData, 0, 0);
+
+    return canvas;
+}
+
+
+async function predict(model, imageElement, canvasId) {
     // Preprocess the input image
     const preprocessedInput = await preprocessImage(imageElement);
 
     // Make a prediction
     const prediction = model.predict(preprocessedInput);
 
-    // Convert the prediction tensor to an image
-    const predictedImage = tensorToImage(prediction);
+    // Ensure the prediction is complete before converting to canvas
+    await prediction.data();
 
-    // Return the canvas element containing the predicted image
-    return predictedImage;
+    // Convert the prediction tensor to a canvas and append to the DOM
+    const predictedCanvas = tensorToCanvas(prediction.squeeze(), canvasId);
+
+    // Append the canvas to the document
+    document.body.appendChild(predictedCanvas);
 }
 
 async function trainModel() {
