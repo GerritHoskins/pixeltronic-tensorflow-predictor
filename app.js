@@ -12,16 +12,24 @@ async function loadModel() {
     }
 }
 
-async function preprocessImage(image) {
-    // Preprocess the image to fit the input shape of the model
-    // This typically involves resizing the image, normalizing values, etc.
-    // Example:
-     return tf.browser.fromPixels(image)
-            .resizeNearestNeighbor([224, 224])
-             .toFloat()
-             .div(tf.scalar(255.0))
-            .expandDims();
+async function preprocessImage(img, targetWidth = 224, targetHeight = 224) {
+    return tf.tidy(() => {
+        // Convert the image to a tensor
+        let tensor = tf.browser.fromPixels(img);
+
+        // Resize the image to the target dimensions
+        tensor = tf.image.resizeBilinear(tensor, [targetHeight, targetWidth]);
+
+        // Normalize the image from [0, 255] to [0, 1]
+        tensor = tensor.toFloat().div(tf.scalar(255));
+
+        // Add the batch dimension
+        tensor = tensor.expandDims(0);
+
+        return tensor;
+    });
 }
+
 
 function tensorToImage(tensor) {
     // Convert the tensor to an image format
