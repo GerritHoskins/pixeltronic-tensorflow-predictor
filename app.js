@@ -155,14 +155,12 @@ async function loadData() {
         return preprocessImage(img); // Preprocess the image (resize, normalize, etc.)
     }));
 
-    const labelTensors = tf.tensor(labelData); // Convert labels to tensor
+    const uniqueLabels = Array.from(new Set(labelData)); // Get unique labels
+    const labelIndices = labelData.map(label => uniqueLabels.indexOf(label)); // Convert to indices
 
-    // Combine the images into one tensor and the labels into another tensor
-     const imagesTensor = tf.stack(imageTensors);
-    //const labelsTensor = tf.oneHot(labelTensors, 2); // Use one-hot encoding for labels if it's a classification task
-    
+    const imagesTensor = tf.stack(imageTensors);
+    const labelTensors = tf.tensor1d(labelIndices, 'int32'); // Convert to int32 tensor
     const labelsTensor = tf.oneHot(labelTensors, 2); // Use one-hot encoding for labels
-
 
     return {imagesTensor, labelsTensor};
 }
