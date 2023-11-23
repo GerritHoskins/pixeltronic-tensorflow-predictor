@@ -78,8 +78,6 @@ function tensorToCanvas(tensor, canvasId) {
     return canvas;
 }
 
-
-
 async function predict(model, imageElement, canvasId) {
     // Preprocess the input image
     const preprocessedInput = await preprocessImage(imageElement);
@@ -96,6 +94,51 @@ async function predict(model, imageElement, canvasId) {
     // Append the canvas to the document
     document.body.appendChild(predictedCanvas);
 }
+
+function createImagePredictionModel(inputHeight, inputWidth, outputHeight, outputWidth) {
+    const model = tf.sequential();
+
+    // Example input layer: assuming the input is an RGB image
+    model.add(tf.layers.conv2d({
+        inputShape: [inputHeight, inputWidth, 3], // 3 for RGB channels
+        filters: 64,
+        kernelSize: 3,
+        activation: 'relu',
+        padding: 'same'
+    }));
+
+    // Add more layers: Convolutional, MaxPooling, Dropout, etc.
+    model.add(tf.layers.maxPooling2d({poolSize: 2, strides: 2}));
+    // Add more layers as needed...
+
+    // Upsampling and Convolutional layers to reach the desired output image size
+    // Example: if the output image is 64x64 RGB
+    model.add(tf.layers.upSampling2d({size: 2}));
+    model.add(tf.layers.conv2d({
+        filters: 224,
+        kernelSize: 3,
+        activation: 'relu',
+        padding: 'same'
+    }));
+
+    model.add(tf.layers.upSampling2d({size: 2}));
+    model.add(tf.layers.conv2d({
+        filters: 3, // 3 filters for RGB output
+        kernelSize: 3,
+        activation: 'sigmoid', // 'sigmoid' to output values between 0 and 1
+        padding: 'same'
+    }));
+
+    model.compile({
+        optimizer: 'adam', // Adam is a good default choice
+        loss: 'meanSquaredError', // For image-to-image, mean squared error can be a good starting point
+        metrics: ['accuracy'] // Depending on your task, you might want different metrics
+    });
+    
+
+    return model;
+}
+
 
 async function trainModel(trainingData, trainingLabels) {
     // Create the model
@@ -121,7 +164,7 @@ async function trainModel(trainingData, trainingLabels) {
 
     // Output layer - Adjust units and activation based on your specific case
     model.add(tf.layers.dense({
-        units: numOutputUnits, // Replace with the actual number of output units
+        units: 2, // Replace with the actual number of output units
         activation: 'softmax' // or another appropriate activation function
     }));
 
@@ -198,16 +241,29 @@ function preprocessImage(img) {
       imgElement.src = URL.createObjectURL(e.target.files[0]);
     }, false);
     imgElement.onload = function () {
-        predict(model, imgElement);
+        predict(model, imgElement, 'prediction-canvas');
       };
+
+      const inputHeight = 128; // Height of input images
+    const inputWidth = 128; // Width of input images
+    const outputHeight = 128; // Height of output images (predicted)
+    const outputWidth = 128; // Width of output images (predicted)
+
 
     try {
         model = await loadModel();
     } catch (error) {
         console.log("Model not found, training a new one");
         const {imagesTensor, labelsTensor} = await loadData();
-        const model = await trainModel(imagesTensor, labelsTensor);
+        const model = createImagePredictionModel(inputHeight, inputWidth, outputHeight, outputWidth);
+        const history = await model.fit(imagesTensor, labelsTensor, {
+            epochs: 50, // Number of epochs
+            validationSplit: 0.2 // Part of data used for validation
+        });
+        await model.save('localstorage://my-tattoo-model');
+
     }
 
+    
     // Add logic to handle user input and call predict()
 })();
