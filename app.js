@@ -156,8 +156,11 @@ async function loadData() {
     const labelTensors = tf.tensor(labelData); // Convert labels to tensor
 
     // Combine the images into one tensor and the labels into another tensor
-    const imagesTensor = tf.stack(imageTensors);
-    const labelsTensor = tf.oneHot(labelTensors, numClasses); // Use one-hot encoding for labels if it's a classification task
+     const imagesTensor = tf.stack(imageTensors);
+    //const labelsTensor = tf.oneHot(labelTensors, 2); // Use one-hot encoding for labels if it's a classification task
+    
+    const labelsTensor = tf.oneHot(labelTensors, numClasses); // Use one-hot encoding for labels
+
 
     return {imagesTensor, labelsTensor};
 }
