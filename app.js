@@ -267,7 +267,7 @@ function preprocessImage(img) {
         const {imagesTensor, labelsTensor} = await loadData();
         model = createImagePredictionModel(inputHeight, inputWidth, outputHeight, outputWidth);
 
-        const reshapedImagesTensor = imagesTensor.reshape([12, 224, 224, 3]);
+        const reshapedImagesTensor = imagesTensor.reshape([16, 224, 224, 3]);
         const history = await model.fit(reshapedImagesTensor, labelsTensor, {
             epochs: 50, // Number of epochs
             validationSplit: 0.2 // Part of data used for validation
