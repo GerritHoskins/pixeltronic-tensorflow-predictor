@@ -235,16 +235,8 @@ function preprocessImage(img) {
 // Main logic
 (async () => {
     let model;
-    let imgElement = document.getElementById('imageSrc');
-    let inputElement = document.getElementById('fileInput');
-    inputElement.addEventListener('change', (e) => {
-      imgElement.src = URL.createObjectURL(e.target.files[0]);
-    }, false);
-    imgElement.onload = function () {
-        predict(model, imgElement, 'prediction-canvas');
-      };
-
-      const inputHeight = 128; // Height of input images
+  
+    const inputHeight = 128; // Height of input images
     const inputWidth = 128; // Width of input images
     const outputHeight = 128; // Height of output images (predicted)
     const outputWidth = 128; // Width of output images (predicted)
@@ -255,14 +247,23 @@ function preprocessImage(img) {
     } catch (error) {
         console.log("Model not found, training a new one");
         const {imagesTensor, labelsTensor} = await loadData();
-        const model = createImagePredictionModel(inputHeight, inputWidth, outputHeight, outputWidth);
-        const history = await model.fit(imagesTensor, labelsTensor, {
+        model = createImagePredictionModel(inputHeight, inputWidth, outputHeight, outputWidth);
+
+        const reshapedImagesTensor = imagesTensor.reshape([10, 224, 224, 3]);
+        const history = await model.fit(reshapedImagesTensor, labelsTensor, {
             epochs: 50, // Number of epochs
             validationSplit: 0.2 // Part of data used for validation
         });
         await model.save('localstorage://my-tattoo-model');
-
     }
+    let imgElement = document.getElementById('imageSrc');
+    let inputElement = document.getElementById('fileInput');
+    inputElement.addEventListener('change', (e) => {
+      imgElement.src = URL.createObjectURL(e.target.files[0]);
+    }, false);
+    imgElement.onload = function () {
+        predict(model, imgElement, 'prediction-canvas');
+      };
 
     
     // Add logic to handle user input and call predict()
