@@ -101,7 +101,7 @@ function createImagePredictionModel(inputHeight, inputWidth, outputHeight, outpu
     // Example input layer: assuming the input is an RGB image
     model.add(tf.layers.conv2d({
         inputShape: [inputHeight, inputWidth, 3], // 3 for RGB channels
-        filters: 64,
+        filters: 224,
         kernelSize: 3,
         activation: 'relu',
         padding: 'same'
