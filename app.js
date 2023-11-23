@@ -236,10 +236,10 @@ function preprocessImage(img) {
 (async () => {
     let model;
   
-    const inputHeight = 128; // Height of input images
-    const inputWidth = 128; // Width of input images
-    const outputHeight = 128; // Height of output images (predicted)
-    const outputWidth = 128; // Width of output images (predicted)
+    const inputHeight = 224; // Height of input images
+    const inputWidth = 224; // Width of input images
+    const outputHeight = 224; // Height of output images (predicted)
+    const outputWidth = 224; // Width of output images (predicted)
 
 
     try {
