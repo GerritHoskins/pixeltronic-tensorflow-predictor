@@ -3,7 +3,7 @@
 async function loadModel() {
     try {
         // Replace 'model-url' with the URL where your model is hosted
-        const model = await tf.loadLayersModel('./models/model.json');
+        const model = await tf.loadLayersModel('https://gerrithoskins.github.io/pixeltronic-tensorflow-predictor/models/model.json');
         console.log("Model loaded successfully");
         return model;
     } catch (error) {
@@ -11,6 +11,33 @@ async function loadModel() {
         throw error;
     }
 }
+
+async function preprocessImage(image) {
+    // Preprocess the image to fit the input shape of the model
+    // This typically involves resizing the image, normalizing values, etc.
+    // Example:
+     return tf.browser.fromPixels(image)
+            .resizeNearestNeighbor([224, 224])
+             .toFloat()
+             .div(tf.scalar(255.0))
+            .expandDims();
+}
+
+async function predict(model, imageElement) {
+    // Preprocess the input image
+    const preprocessedInput = await preprocessImage(imageElement);
+
+    // Make a prediction
+    const prediction = model.predict(preprocessedInput);
+
+    // Process the output (depends on your model's output)
+    // For example, you might want to convert tensor to human-readable data
+    // Example: const predictionData = prediction.dataSync();
+
+    // Return or display the prediction result
+    return prediction;
+}
+
 
 async function trainModel() {
     // Create the model
@@ -43,10 +70,6 @@ async function loadData() {
     return {trainingData, trainingLabels};
 }
 
-async function predict(model, inputData) {
-    // Make predictions
-    // ...
-}
 
 // Main logic
 (async () => {
