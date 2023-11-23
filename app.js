@@ -3,7 +3,7 @@
 async function loadModel() {
     try {
         // Replace 'model-url' with the URL where your model is hosted
-        const model = await tf.loadLayersModel('https://gerrithoskins.github.io/pixeltronic-tensorflow-predictor/models/model.json');
+        const model = await tf.loadLayersModel('https://gerrithoskins.github.io/pixeltronic-tensorflow-predictor/models/model1.json');
         console.log("Model loaded successfully");
         return model;
     } catch (error) {
@@ -97,37 +97,94 @@ async function predict(model, imageElement, canvasId) {
     document.body.appendChild(predictedCanvas);
 }
 
-async function trainModel() {
+async function trainModel(trainingData, trainingLabels) {
     // Create the model
     const model = tf.sequential();
-    // Add layers
-    // ...
+
+    // Define the model architecture
+    model.add(tf.layers.conv2d({
+        inputShape: [224, 224, numColorChannels], // Replace with actual values
+        filters: 32,
+        kernelSize: 3,
+        activation: 'relu',
+    }));
+    model.add(tf.layers.maxPooling2d({poolSize: 2, strides: 2}));
+    // Add more layers as needed...
+
+    model.add(tf.layers.flatten());
+    model.add(tf.layers.dense({
+        units: 128,
+        activation: 'relu'
+    }));
+
+    // Output layer - Adjust units and activation based on your specific case
+    model.add(tf.layers.dense({
+        units: numOutputUnits, // Replace with the actual number of output units
+        activation: 'softmax' // or another appropriate activation function
+    }));
 
     // Compile the model
     model.compile({
         optimizer: 'adam',
-        loss: 'categoricalCrossentropy',
+        loss: 'categoricalCrossentropy', // Choose an appropriate loss function
         metrics: ['accuracy'],
     });
 
-    // Load and preprocess your data
-    const {trainingData, trainingLabels} = await loadData();
-
     // Train the model
     const history = await model.fit(trainingData, trainingLabels, {
-        epochs: 50,
-        validationSplit: 0.2,
+        epochs: 50, // Adjust number of epochs as necessary
+        validationSplit: 0.2, // Adjust validation split as necessary
     });
 
     return model;
 }
 
+
 async function loadData() {
-    // Load and preprocess your dataset
-    // ...
-    return {trainingData, trainingLabels};
+    // Example: Loading image data
+
+    const imagePaths = ['data/Off-samples/1.jpg', 'data/Off-samples/2.jpg', 'data/Off-samples/3.jpg', 
+    'data/Off-samples/4.jpg', 'data/Off-samples/5.jpg', 'data/On-samples/1.jpg', 'data/On-samples/2.jpg', 'data/On-samples/3.jpg', 
+    'data/On-samples/4.jpg', 'data/On-samples/5.jpg']; // Paths to your images
+    const labelData = ["On","Off"]; // Corresponding labels for your images
+
+    const imageTensors = await Promise.all(imagePaths.map(async (path) => {
+        const img = await loadImage(path);
+        return preprocessImage(img); // Preprocess the image (resize, normalize, etc.)
+    }));
+
+    const labelTensors = tf.tensor(labelData); // Convert labels to tensor
+
+    // Combine the images into one tensor and the labels into another tensor
+    const imagesTensor = tf.stack(imageTensors);
+    const labelsTensor = tf.oneHot(labelTensors, numClasses); // Use one-hot encoding for labels if it's a classification task
+
+    return {imagesTensor, labelsTensor};
 }
 
+async function loadImage(path) {
+    return new Promise((resolve, reject) => {
+        // Logic to load an image from the path
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(err);
+        img.src = path;
+    });
+}
+
+function preprocessImage(img) {
+    // Convert the image to a tensor and preprocess it
+    return tf.tidy(() => {
+        let tensor = tf.browser.fromPixels(img)
+                    .resizeNearestNeighbor([desiredHeight, desiredWidth]) // Resize the image
+                    .toFloat()
+                    .div(tf.scalar(255)); // Normalize the image
+
+        // Additional preprocessing like mean subtraction, etc., can go here
+
+        return tensor.expandDims(); // Add batch dimension
+    });
+}
 
 // Main logic
 (async () => {
@@ -145,7 +202,8 @@ async function loadData() {
         model = await loadModel();
     } catch (error) {
         console.log("Model not found, training a new one");
-        model = await trainModel();
+        const {imagesTensor, labelsTensor} = await loadData();
+        const model = await trainModel(imagesTensor, labelsTensor);
     }
 
     // Add logic to handle user input and call predict()
