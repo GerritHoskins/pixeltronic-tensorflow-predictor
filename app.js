@@ -23,6 +23,23 @@ async function preprocessImage(image) {
             .expandDims();
 }
 
+function tensorToImage(tensor) {
+    // Convert the tensor to an image format
+    // The specific implementation depends on the tensor format
+    // For example, using a canvas to draw the image
+    const [width, height] = tensor.shape.slice(1, 3);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    // Convert the tensor to imageData
+    const imageData = new ImageData(new Uint8ClampedArray(tensor.dataSync()), width, height);
+    ctx.putImageData(imageData, 0, 0);
+
+    return canvas;
+}
+
 async function predict(model, imageElement) {
     // Preprocess the input image
     const preprocessedInput = await preprocessImage(imageElement);
@@ -30,14 +47,12 @@ async function predict(model, imageElement) {
     // Make a prediction
     const prediction = model.predict(preprocessedInput);
 
-    // Process the output (depends on your model's output)
-    // For example, you might want to convert tensor to human-readable data
-    // Example: const predictionData = prediction.dataSync();
+    // Convert the prediction tensor to an image
+    const predictedImage = tensorToImage(prediction);
 
-    // Return or display the prediction result
-    return prediction;
+    // Return the canvas element containing the predicted image
+    return predictedImage;
 }
-
 
 async function trainModel() {
     // Create the model
