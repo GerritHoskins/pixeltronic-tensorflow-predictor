@@ -101,6 +101,8 @@ async function trainModel(trainingData, trainingLabels) {
     // Create the model
     const model = tf.sequential();
 
+    const numColorChannels = 3;
+
     // Define the model architecture
     model.add(tf.layers.conv2d({
         inputShape: [224, 224, numColorChannels], // Replace with actual values
@@ -159,7 +161,7 @@ async function loadData() {
      const imagesTensor = tf.stack(imageTensors);
     //const labelsTensor = tf.oneHot(labelTensors, 2); // Use one-hot encoding for labels if it's a classification task
     
-    const labelsTensor = tf.oneHot(labelTensors, numClasses); // Use one-hot encoding for labels
+    const labelsTensor = tf.oneHot(labelTensors, 2); // Use one-hot encoding for labels
 
 
     return {imagesTensor, labelsTensor};
