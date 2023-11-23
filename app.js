@@ -243,12 +243,22 @@ function preprocessImage(img) {
 // Main logic
 (async () => {
     let model;
-  
+    
+    let imgElement = document.getElementById('imageSrc');
+    let inputElement = document.getElementById('fileInput');
+
     const inputHeight = 224; // Height of input images
     const inputWidth = 224; // Width of input images
     const outputHeight = 224; // Height of output images (predicted)
     const outputWidth = 224; // Width of output images (predicted)
 
+       
+    inputElement.addEventListener('change', (e) => {
+    imgElement.src = URL.createObjectURL(e.target.files[0]);
+    }, false);
+    imgElement.onload = function () {
+    predict(model, imgElement, 'prediction-canvas');
+    };
 
     try {
         model = await loadModel();
@@ -264,15 +274,5 @@ function preprocessImage(img) {
         });
         await model.save('localstorage://my-tattoo-model');
     }
-    let imgElement = document.getElementById('imageSrc');
-    let inputElement = document.getElementById('fileInput');
-    inputElement.addEventListener('change', (e) => {
-      imgElement.src = URL.createObjectURL(e.target.files[0]);
-    }, false);
-    imgElement.onload = function () {
-        predict(model, imgElement, 'prediction-canvas');
-      };
-
-    
     // Add logic to handle user input and call predict()
 })();
