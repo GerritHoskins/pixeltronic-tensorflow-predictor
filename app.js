@@ -81,6 +81,9 @@ async function loadData() {
     inputElement.addEventListener('change', (e) => {
       imgElement.src = URL.createObjectURL(e.target.files[0]);
     }, false);
+    imgElement.onload = function () {
+        predict(model, imgElement);
+      };
 
     try {
         model = await loadModel();
