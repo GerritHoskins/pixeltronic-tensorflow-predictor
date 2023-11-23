@@ -188,8 +188,8 @@ async function trainModel(trainingData, trainingLabels) {
 async function loadData() {
     // Example: Loading image data
 
-    const imagePaths = ['data/Off-samples/1.jpg', 'data/Off-samples/2.jpg', 'data/Off-samples/3.jpg', 
-    'data/Off-samples/4.jpg', 'data/Off-samples/5.jpg', 'data/On-samples/1.jpg', 'data/On-samples/2.jpg', 'data/On-samples/3.jpg', 
+    const imagePaths = ['data/Off-samples/0.jpg', 'data/Off-samples/1.jpg', 'data/Off-samples/2.jpg', 'data/Off-samples/3.jpg', 
+    'data/Off-samples/4.jpg', 'data/Off-samples/5.jpg', 'data/On-samples/0.jpg', 'data/On-samples/1.jpg', 'data/On-samples/2.jpg', 'data/On-samples/3.jpg', 
     'data/On-samples/4.jpg', 'data/On-samples/5.jpg']; // Paths to your images
     const labelData = ["On","Off"]; // Corresponding labels for your images
 
