@@ -41,16 +41,27 @@ function tensorToImage(tensor) {
 }
 
 function tensorToCanvas(tensor, canvasId) {
-    // Convert the tensor to a canvas element
+    // Check if tensor has at least 2 dimensions
+    if (tensor.shape.length < 2) {
+        throw new Error("Tensor does not have enough dimensions (expected at least 2)");
+    }
+
+    // Extract width and height from tensor shape
     const [height, width] = tensor.shape.slice(0, 2);
+
+    // Check if width and height are valid numbers
+    if (!width || !height) {
+        throw new Error(`Invalid tensor shape: width or height is zero or not a number (width: ${width}, height: ${height})`);
+    }
+
     const canvas = document.getElementById(canvasId) || document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
 
-    // Normalize the tensor to 0-255 and reshape to [height * width, 4] for RGBA format
+    // Normalize the tensor to 0-255 and reshape for RGBA format
     let tensorData = tensor.mul(255).toInt().dataSync();
-    
+
     // Handling cases where the tensor is not in RGBA format
     if (tensorData.length !== height * width * 4) {
         // Assuming the tensor is in RGB format, add an Alpha channel
@@ -66,6 +77,7 @@ function tensorToCanvas(tensor, canvasId) {
 
     return canvas;
 }
+
 
 
 async function predict(model, imageElement, canvasId) {
@@ -115,8 +127,6 @@ async function loadData() {
     // ...
     return {trainingData, trainingLabels};
 }
-
-
 
 
 // Main logic
