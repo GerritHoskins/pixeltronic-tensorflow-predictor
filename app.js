@@ -3,7 +3,7 @@
 async function loadModel() {
     try {
         // Replace 'model-url' with the URL where your model is hosted
-        const model = await tf.loadLayersModel('https://teachablemachine.withgoogle.com/models/iNIpTtIk-/');
+        const model = await tf.loadLayersModel('./models/model.json');
         console.log("Model loaded successfully");
         return model;
     } catch (error) {
