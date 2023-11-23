@@ -176,7 +176,7 @@ function preprocessImage(img) {
     // Convert the image to a tensor and preprocess it
     return tf.tidy(() => {
         let tensor = tf.browser.fromPixels(img)
-                    .resizeNearestNeighbor([desiredHeight, desiredWidth]) // Resize the image
+                    .resizeNearestNeighbor([224, 224]) // Resize the image
                     .toFloat()
                     .div(tf.scalar(255)); // Normalize the image
 
