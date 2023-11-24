@@ -1,4 +1,4 @@
-import tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs';
 
 (async () => {
     const status = document.getElementById('status');
