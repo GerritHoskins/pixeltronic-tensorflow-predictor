@@ -10,7 +10,7 @@
   },
   "scripts": {
     "watch": "npm run build && node_modules/http-server/bin/http-server dist -p 1234 ",
-    "build": "mkdir -p dist/ && cp index.html dist/ && cp index.js dist/  && cp style.css dist/"
+    "build": "mkdir -p dist/ && cp index.html dist/ && cp index.js dist/  && cp style.css dist/  && cp data dist/"
   },
   "devDependencies": {
     "clang-format": "^1.8.0",
